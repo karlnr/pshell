@@ -1,0 +1,43 @@
+############## GENERATE FILE LIST
+dir -n > Filename.csv
+# filtered
+dir -n -Filter *.pdf > filename.txt
+
+############## RENAME FILES
+$CSVRef = Import-Csv "Filename.csv"
+
+Get-ChildItem -Filter *.pdf | ForEach-Object {
+$CurrentFile = $_
+ForEach ($objName in $CSVRef) {
+if ($CurrentFile.Name -ilike $objName.OLDNAME) {
+Rename-Item $CurrentFile.FullName $objName.NEWNAME
+}
+}}
+
+
+############# GENERATE INDEX
+
+dir | Foreach-Object {$_.BaseName} > "0200_PSV-H1117 COVER LIST.txt"
+
+$word_app = New-Object -ComObject Word.Application
+
+# This filter will find .txt documents
+Get-ChildItem -Path $documents_path -Filter *.txt? | ForEach-Object {
+
+    $document = $word_app.Documents.Open($_.FullName)
+
+    $pdf_filename = "$($_.DirectoryName)\$($_.BaseName).pdf"
+
+    $document.SaveAs([ref] $pdf_filename, [ref] 17)
+
+    $document.Close()
+}
+
+$word_app.Quit()
+
+
+
+####### delete text file
+
+
+
